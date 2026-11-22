@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Food Diary</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main>
+        <header>
+            <h1>Food Diary</h1><button class="btn s" id="th" aria-label="Toggle theme">Theme</button>
+        </header>
+        <nav role="tablist">
+            <button role="tab" data-t="hoy" aria-selected="true">Day</button>
+            <button role="tab" data-t="sem" aria-selected="false">Week</button>
+            <button role="tab" data-t="aj" aria-selected="false">Goals</button>
+        </nav>
+
+        <section id="hoy">
+            <div class="date"><button class="btn s" id="prev" aria-label="Previous day">‹</button><input type="date"
+                    id="fecha" aria-label="Date"><button class="btn s" id="next" aria-label="Next day">›</button></div>
+            <div class="card" id="resumen"></div>
+            <div class="card">
+                <h2 id="ft">Add meal</h2>
+                <form id="form" onsubmit="return false" class="hide-form"></form>
+            </div>
+            <div class="card">
+                <h2>Meals of the day</h2>
+                <div id="lista"></div>
+            </div>
+        </section>
+
+        <section id="sem" class="hide">
+            <div class="card">
+                <h2>Calories per day</h2>
+                <div id="chCal"></div>
+                <p class="pre" id="prom"></p>
+            </div>
+            <div class="card">
+                <h2>Macro split (average)</h2>
+                <div id="chMac"></div>
+            </div>
+        </section>
+
+        <section id="aj" class="hide">
+            <div class="card">
+                <h2>Daily goals</h2>
+                <div class="g g4" id="metas"></div>
+                <p class="pre">Calories for each food are calculated as 4 kcal/g of protein and carbs, and 9 kcal/g of
+                    fat.</p>
+                <p><button class="btn" id="gm">Save goals</button> <span id="ok" class="mu"></span></p>
+            </div>
+            <div class="card">
+                <h2>Saved foods</h2>
+                <div id="foods"></div>
+            </div>
+        </section>
+    </main>
+    <datalist id="dl"></datalist>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
