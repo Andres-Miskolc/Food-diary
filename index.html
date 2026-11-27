@@ -17,6 +17,7 @@
             <button role="tab" data-t="hoy" aria-selected="true">Day</button>
             <button role="tab" data-t="sem" aria-selected="false">Week</button>
             <button role="tab" data-t="aj" aria-selected="false">Goals</button>
+            <button role="tab" data-t="plan" aria-selected="false">Planning</button>
         </nav>
 
         <section id="hoy">
@@ -54,8 +55,74 @@
                 <p><button class="btn" id="gm">Save goals</button> <span id="ok" class="mu"></span></p>
             </div>
             <div class="card">
+                <h2>Body mass index (BMI)</h2>
+                <div class="g">
+                    <div><label for="peso">Weight (kg)</label><input id="peso" type="number" min="1" step="any"
+                            inputmode="decimal"></div>
+                    <div><label for="altura">Height (cm)</label><input id="altura" type="number" min="1" step="any"
+                            inputmode="decimal"></div>
+                </div>
+                <div class="imc-display">
+                    <svg viewBox="0 0 120 200" role="img" aria-label="Human body silhouette">
+                        <g id="imcSilueta" class="imc-figure">
+                            <circle cx="60" cy="24" r="15"></circle>
+                            <path
+                                d="M60 43c-12 0-20 6-24 16L24 89c-2 5 0 10 5 12 4 1 7-1 9-5l9-21-3 32-13 68c-1 6 2 11 7 12 6 1 10-2 12-8l10-50 10 50c2 6 6 9 12 8 5-1 8-6 7-12l-13-68-3-32 9 21c2 4 5 6 9 5 5-2 7-7 5-12L84 59c-4-10-12-16-24-16Z">
+                            </path>
+                        </g>
+                    </svg>
+                    <p id="imcResultado" class="imc-result" aria-live="polite"></p>
+                </div>
+                <p class="pre">BMI is an estimate based on standard adult ranges: under 18.5 is low, 18.5–24.9 is
+                    healthy, and 25 or above is high.</p>
+            </div>
+            <div class="card">
                 <h2>Saved foods</h2>
                 <div id="foods"></div>
+            </div>
+        </section>
+
+        <section id="plan" class="hide">
+            <div class="card">
+                <h2>Nutrition planning</h2>
+                <p class="pre">Enter your details to estimate daily calories and macros.</p>
+                <form id="planningForm">
+                    <div class="g g4 planning-fields">
+                        <div><label for="planWeight">Weight (kg)</label><input id="planWeight" type="number" min="1"
+                                step="any" inputmode="decimal" required></div>
+                        <div><label for="planHeight">Height (cm)</label><input id="planHeight" type="number" min="1"
+                                step="any" inputmode="decimal" required></div>
+                        <div><label for="planAge">Age </label><input id="planAge" type="number" min="18"
+                                max="120" step="1" required></div>
+                        <div><label for="planSex">Sex</label><select id="planSex" required>
+                                <option value="">Select</option>
+                                <option value="male">Man</option>
+                                <option value="female">Woman</option>
+                            </select></div>
+                        <div><label for="planActivity">Physical activity</label><select id="planActivity" required>
+                                <option value="">Select</option>
+                                <option value="sedentary">Sedentary (little or no exercise)</option>
+                                <option value="light">Light (1–3 days/week)</option>
+                                <option value="moderate">Moderate (3–5 days/week)</option>
+                                <option value="high">Very active (6–7 days/week)</option>
+                                <option value="very">Extra active (intense training or physical job)</option>
+                            </select></div>
+                        <div><label for="planGoal">Goal</label><select id="planGoal" required>
+                                <option value="">Select</option>
+                                <option value="gain">Gain muscle</option>
+                                <option value="maintain">Maintain</option>
+                                <option value="lose">Lose weight</option>
+                            </select></div>
+                    </div>
+                    <p><button class="btn" type="submit">Calculate plan</button> <span id="planError" class="mu"
+                            role="status"></span></p>
+                </form>
+                <div id="planningResults" class="planning-results hide" aria-live="polite">
+                    <h3>Recommended daily intake</h3>
+                    <div id="planSummary"></div>
+                    <p><button class="btn" id="applyPlan" type="button">Apply as daily goals</button> <span
+                            id="planApplyStatus" class="mu" role="status"></span></p>
+                </div>
             </div>
         </section>
     </main>

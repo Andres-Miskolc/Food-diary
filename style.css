@@ -12,7 +12,9 @@
     --p: #3568D4;
     --c: #D9921F;
     --f: #D4543F;
-    --ok: #2E8B57
+    --ok: #2E8B57;
+    --imc-low: #2876C7;
+    --imc-high: #D4543F
 }
 
 html {
@@ -237,4 +239,65 @@ svg {
     font-size: .85rem;
     color: var(--mu);
     margin: 8px 0 0
+}
+
+.imc-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-height: 160px;
+    margin-top: 12px
+}
+
+.imc-display svg {
+    width: 84px;
+    height: 140px;
+    flex: 0 0 auto
+}
+
+.imc-figure {
+    fill: none;
+    stroke: var(--mu);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round
+}
+
+.imc-low {
+    fill: var(--imc-low);
+    stroke: none
+}
+
+.imc-healthy {
+    fill: var(--ok);
+    stroke: none
+}
+
+.imc-high {
+    fill: var(--imc-high);
+    stroke: none
+}
+
+.imc-result {
+    font-weight: 600
+}
+
+.planning-fields select {
+    min-height: 44px
+}
+
+.planning-results {
+    border-top: 1px solid var(--bd);
+    margin-top: 20px;
+    padding-top: 16px
+}
+
+.planning-results h3 {
+    font-size: 1rem;
+    margin: 0 0 10px
+}
+
+.planning-results .row {
+    padding: 4px 0
 }

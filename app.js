@@ -1,7 +1,33 @@
 const $ = s => document.querySelector(s);
 const TIPOS = ["Breakfast", "Lunch", "Dinner", "Snack"];
-let S = { meals: [], foods: [], goals: { kcal: 2000, p: 120, c: 230, f: 65 } };
-function load() { try { const r = localStorage.getItem("diario-v1"); if (r) S = Object.assign(S, JSON.parse(r)) } catch (e) { } }
+let S = {
+    meals: [], foods: [], goals: { kcal: 2000, p: 120, c: 230, f: 65 },
+    bmi: { weight: "", height: "" },
+    planning: { weight: "", height: "", age: "", sex: "", activity: "", goal: "", result: null }
+};
+const ACTIVITY_LEVELS = {
+    sedentary: 1.2,
+    light: 1.375,
+    moderate: 1.55,
+    high: 1.725,
+    very: 1.9
+};
+const PLANNING_GOALS = {
+    gain: { adjustment: 250, macros: [30, 25, 45] },
+    maintain: { adjustment: 0, macros: [25, 30, 45] },
+    lose: { adjustment: -500, macros: [30, 30, 40] }
+};
+function load() {
+    try {
+        const r = localStorage.getItem("diario-v1");
+        if (r) S = Object.assign(S, JSON.parse(r));
+        S.bmi = Object.assign({ weight: "", height: "" }, S.bmi || {});
+        S.planning = Object.assign(
+            { weight: "", height: "", age: "", sex: "", activity: "", goal: "", result: null },
+            S.planning || {}
+        );
+    } catch (e) { }
+}
 function save() { try { localStorage.setItem("diario-v1", JSON.stringify(S)) } catch (e) { } }
 const iso = d => { const z = new Date(d.getTime() - d.getTimezoneOffset() * 6e4); return z.toISOString().slice(0, 10) };
 let fecha = iso(new Date()), editId = null;
@@ -96,13 +122,119 @@ function renderAjustes() {
     const g = S.goals, f = [["kcal", "Calories (kcal)"], ["p", "Protein (g)"], ["c", "Carbs (g)"], ["f", "Fat (g)"]];
     $("#metas").innerHTML = f.map(([k, l]) => `<div><label for="m_${k}">${l}</label><input id="m_${k}" type="number" min="0" value="${g[k]}"></div>`).join("");
     $("#gm").onclick = () => { f.forEach(([k]) => S.goals[k] = +$("#m_" + k).value || 0); save(); renderAll(); $("#ok").textContent = "Saved."; setTimeout(() => $("#ok").textContent = "", 2000) };
+    $("#peso").value = S.bmi.weight;
+    $("#altura").value = S.bmi.height;
+    const updateBmi = () => {
+        S.bmi.weight = $("#peso").value;
+        S.bmi.height = $("#altura").value;
+        save();
+        renderBmi();
+    };
+    $("#peso").oninput = updateBmi;
+    $("#altura").oninput = updateBmi;
+    renderBmi();
     $("#foods").innerHTML = S.foods.length ? S.foods.map((x, i) => `<div class="meal"><div><b>${esc(x.nombre)}</b><br><small>per 100 g: ${x.k100 ? x.k100 + " kcal · " : ""}P ${x.p100} · C ${x.c100} · F ${x.f100}</small></div><button class="ib" data-x="${i}">Delete</button></div>`).join("") : '<p class="empty">Foods you add are saved here so you can reuse them.</p>';
     $("#foods").querySelectorAll("[data-x]").forEach(b => b.onclick = () => { S.foods.splice(+b.dataset.x, 1); save(); renderAll() })
 }
 
+function renderBmi() {
+    const weight = Number(S.bmi.weight), height = Number(S.bmi.height) / 100;
+    const figure = $("#imcSilueta"), result = $("#imcResultado");
+    figure.setAttribute("class", "imc-figure");
+    result.textContent = "";
+    if (!(weight > 0 && height > 0 && Number.isFinite(weight) && Number.isFinite(height))) return;
+    const bmi = weight / (height * height);
+    const category = bmi < 18.5
+        ? ["imc-low", "Underweight"]
+        : bmi < 25
+            ? ["imc-healthy", "Healthy range"]
+            : ["imc-high", "High BMI"];
+    figure.classList.add(category[0]);
+    result.textContent = `BMI: ${bmi.toFixed(1)} · ${category[1]}`;
+}
+
+function calculatePlan(planning) {
+    const weight = Number(planning.weight), height = Number(planning.height), age = Number(planning.age);
+    const activity = ACTIVITY_LEVELS[planning.activity], goal = PLANNING_GOALS[planning.goal];
+    if (!(weight > 0 && height > 0 && age >= 18 && age <= 120) ||
+        !Number.isFinite(weight) || !Number.isFinite(height) || !Number.isFinite(age) ||
+        (planning.sex !== "male" && planning.sex !== "female") || !activity || !goal) return null;
+    const bmr = 10 * weight + 6.25 * height - 5 * age + (planning.sex === "male" ? 5 : -161);
+    const calories = Math.round(bmr * activity + goal.adjustment);
+    if (!(calories > 0) || !Number.isFinite(calories)) return null;
+    const [proteinPercent, fatPercent, carbsPercent] = goal.macros;
+    return {
+        kcal: calories,
+        p: Math.round(calories * proteinPercent / 100 / 4),
+        f: Math.round(calories * fatPercent / 100 / 9),
+        c: Math.round(calories * carbsPercent / 100 / 4),
+        proteinPercent,
+        fatPercent,
+        carbsPercent
+    };
+}
+
+function renderPlanningResult() {
+    const result = S.planning.result;
+    $("#planningResults").classList.toggle("hide", !result);
+    $("#applyPlan").disabled = !result;
+    if (!result) return;
+    $("#planSummary").innerHTML =
+        `<div class="row"><b>Calories</b><span>${result.kcal} kcal</span></div>` +
+        `<div class="row"><span>Protein (${result.proteinPercent}%)</span><span>${result.p} g</span></div>` +
+        `<div class="row"><span>Fat (${result.fatPercent}%)</span><span>${result.f} g</span></div>` +
+        `<div class="row"><span>Carbohydrates (${result.carbsPercent}%)</span><span>${result.c} g</span></div>`;
+}
+
+function renderPlanning() {
+    if (S.planning.result) S.planning.result = calculatePlan(S.planning);
+    const fields = [
+        ["planWeight", "weight"], ["planHeight", "height"], ["planAge", "age"],
+        ["planSex", "sex"], ["planActivity", "activity"], ["planGoal", "goal"]
+    ];
+    fields.forEach(([id, key]) => {
+        const input = $("#" + id);
+        input.value = S.planning[key];
+        input.oninput = () => {
+            S.planning[key] = input.value;
+            S.planning.result = null;
+            $("#planError").textContent = "";
+            $("#planApplyStatus").textContent = "";
+            save();
+            renderPlanningResult();
+        };
+    });
+    $("#planningForm").onsubmit = event => {
+        event.preventDefault();
+        S.planning.result = calculatePlan(S.planning);
+        if (!S.planning.result) {
+            $("#planError").textContent = "Enter valid adult details to calculate a plan.";
+            renderPlanningResult();
+            return;
+        }
+        $("#planError").textContent = "";
+        $("#planApplyStatus").textContent = "";
+        save();
+        renderPlanningResult();
+    };
+    $("#applyPlan").onclick = () => {
+        if (!S.planning.result) return;
+        S.goals = {
+            kcal: S.planning.result.kcal,
+            p: S.planning.result.p,
+            c: S.planning.result.c,
+            f: S.planning.result.f
+        };
+        save();
+        renderAll();
+        $("#planApplyStatus").textContent = "Applied to Daily goals.";
+    };
+    renderPlanningResult();
+}
+
 function renderAll() {
     $("#fecha").value = fecha; $("#dl").innerHTML = S.foods.map(f => `<option value="${esc(f.nombre)}">`).join("");
-    renderResumen(); renderForm(); renderLista(); renderSemana(); renderAjustes()
+    renderResumen(); renderForm(); renderLista(); renderSemana(); renderAjustes(); renderPlanning()
 }
 
 function shift(n) { const d = new Date(fecha + "T12:00:00"); d.setDate(d.getDate() + n); fecha = iso(d); editId = null; renderAll() }
@@ -110,6 +242,6 @@ $("#prev").onclick = () => shift(-1); $("#next").onclick = () => shift(1);
 $("#fecha").onchange = e => { if (e.target.value) { fecha = e.target.value; editId = null; renderAll() } };
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
     document.querySelectorAll("nav button").forEach(x => x.setAttribute("aria-selected", x === b));
-    ["hoy", "sem", "aj"].forEach(id => $("#" + id).classList.toggle("hide", id !== b.dataset.t))
+    ["hoy", "sem", "aj", "plan"].forEach(id => $("#" + id).classList.toggle("hide", id !== b.dataset.t))
 });
 load(); renderAll();
