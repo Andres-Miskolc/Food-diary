@@ -15,34 +15,6 @@
     --ok: #2E8B57
 }
 
-@media(prefers-color-scheme:dark) {
-    :root:not([data-theme="light"]) {
-        --bg: #12161F;
-        --sf: #1B212D;
-        --tx: #EDF0F5;
-        --mu: #9AA4B5;
-        --bd: #2B3342;
-        --ac: #EDF0F5;
-        --ac-t: #12161F;
-        --p: #6C9BFF;
-        --c: #F0B04F;
-        --f: #F27F6B
-    }
-}
-
-:root[data-theme="dark"] {
-    --bg: #12161F;
-    --sf: #1B212D;
-    --tx: #EDF0F5;
-    --mu: #9AA4B5;
-    --bd: #2B3342;
-    --ac: #EDF0F5;
-    --ac-t: #12161F;
-    --p: #6C9BFF;
-    --c: #F0B04F;
-    --f: #F27F6B
-}
-
 html {
     scroll-padding-top: env(safe-area-inset-top, 0px)
 }

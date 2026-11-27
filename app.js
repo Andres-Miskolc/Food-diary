@@ -112,5 +112,4 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
     document.querySelectorAll("nav button").forEach(x => x.setAttribute("aria-selected", x === b));
     ["hoy", "sem", "aj"].forEach(id => $("#" + id).classList.toggle("hide", id !== b.dataset.t))
 });
-$("#th").onclick = () => { const el = document.documentElement, dark = el.dataset.theme ? el.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; el.dataset.theme = dark ? "light" : "dark" };
 load(); renderAll();
